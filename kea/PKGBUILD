@@ -1,0 +1,108 @@
+# Maintainer: Konstantin Gizdov <arch at kge dot pw>
+# Contributor: Baptiste Jonglez <baptiste--aur at jonglez dot org>
+# Contributor: nfnty
+pkgname='kea-premium'
+_basepkgname='kea'
+pkgver=1.9.6
+_upstreamver=1.9.6
+pkgrel=1
+pkgdesc='High-performance, extensible DHCP server engine from ISC, supporting both DHCPv4 and DHCPv6'
+arch=('x86_64' 'aarch64')
+url='https://kea.isc.org'
+license=('MPL2')
+depends=('botan' 'boost-libs' 'log4cplus' 'mariadb-libs' 'openssl' 'postgresql-libs')
+makedepends=(
+  'boost'
+  'postgresql'  # Needed for some headers
+  'python'  # kea-shell
+)
+optdepends=('mariadb: lease information database'
+            'postgresql: lease information database'
+            'python: to use kea-shell'
+            'kea-devel-docs: developer documentation')
+# Checks are disabled for now
+# checkdepends=('gtest' 'postgresql' 'mariadb' 'python' 'procps-ng') # procps-ng needed for 'pgrep'
+backup=(
+  # New config files as of Kea 1.3
+  'etc/kea/kea-dhcp4.conf'
+  'etc/kea/kea-dhcp6.conf'
+  'etc/kea/kea-dhcp-ddns.conf'
+  'etc/kea/keactrl.conf'
+  'etc/kea/kea-ctrl-agent.conf'
+  'etc/kea/kea-netconf.conf'
+)
+checkdepends=('gtest' 'procps-ng')
+install=kea.install
+
+source=(
+  "https://ftp.isc.org/isc/${_basepkgname}/${_upstreamver}/${_basepkgname}-${_upstreamver}.tar.gz"{,.asc}
+  "http://192.168.28.200:8010/v1/AUTH_Repositories/linux/noarch/kea-premium-${_upstreamver}.tar.gz"{,.asc}
+  'tmpfiles-kea.conf'
+  'kea-dhcp4.service'
+  'kea-dhcp6.service'
+  'kea-dhcp-ddns.service'
+  'kea-ctrl-agent.service'
+  'kea.install'
+  'kea.sysusers'
+)
+sha512sums=('958656e72b20e9c13ec1dff1a5303e7c01e957e66627da85f3ce8ed26756aadfa03fa9673964fb73f1305a82dfc7fcb259f3ab91910fc3081a6530e090f3700c'
+            'SKIP'
+            '01e5a82cfef6fb7435e1be386f52a5b4882ea02a68dcbaccaedaecf8b30915d09aab85067452aea28590acc15ffa48c87deeac144a86d8a6a556160f2ec53cab'
+            'SKIP'
+            'b83479f0b90caf4022b1c858f99d8310848a90b0cc45aaa222cb2bf08b2a97312816b8f64c8c0232b612795bc7a0bbe5b05dbc508b2f1214c1ea88dc84200a2d'
+            '1b62dace9f9a955b21c5dd5b5466fb3a4f1d8057ad2a30ea89e222a769dc721ad2fe4913c41ec407e018b1b38ddde757e9b7b8fc12d4763ddde077a0abb0c971'
+            '8f0e8d059338c415ae322e971e243b259d9b2ef7d37b6be57b409bf5f0f3392e519c9bb94c5b548021d000b944a5da82096608cd9ff3ee58061059ad519b0068'
+            'b0b32f1010512e042a34e3c4351504fb2e422dd8e06e68c291fa5cd030c7e4bff6f7013e8e07b759479652d9ddf747f26a295704bcfc119811912b01f053faba'
+            'db329fd83e458e4a77f6df8569074088bed152ffc1a188059d868d7178a6d3530efe368ce870a2e0be894f87fa0e5ba43562bdc3ad6372ddfcfedae37c90f491'
+            '758371f20a977f8e42e9d43d2d065c6aa294866070e54868dc329c0875b2eeafa05dcdf93590d5b429e262e2350a42c7616a3bc2e6f3994f53886870f4910251'
+            'abc48d5554ebe4c89180d6e4ce91d5fd3c6ca3dcb360dcb1dde6d34b677b5f311e86184d30c52d610b155f73147d9f6f1151490242a71fbeb150ded8bdb3f38e')
+validpgpkeys=('BE0E9748B718253A28BB89FFF1B11BF05CF02E57'  # Internet Systems Consortium, Inc. (Signing key, 2017-2018) <codesign@isc.org>
+              'AE3FAC796711EC59FC007AA474BB6B9A4CBB3D38'  # Internet Systems Consortium, Inc. (Signing key, 2019-2020) <codesign@isc.org>
+              '7E1C91AC8030A5A59D1EFAB9750F3C87723E4012') # Internet Systems Consortium, Inc. (Signing key, 2021-2022) <codesign@isc.org>
+
+prepare() {
+  mv "${srcdir}/premium" "${srcdir}/${_basepkgname}-${_upstreamver}/premium"
+}
+
+build() {
+  cd "${srcdir}/${_basepkgname}-${_upstreamver}"
+  autoreconf --install
+  ./configure \
+      --prefix='/usr' \
+      --sbindir='/usr/bin' \
+      --libexecdir='/usr/bin' \
+      --sysconfdir='/etc' \
+      --localstatedir='/var' \
+      --with-openssl \
+      --with-gtest \
+      --with-mysql \
+      --with-pgsql \
+      --with-log4cplus \
+      --enable-perfdhcp \
+      --enable-generate-messages \
+      --enable-generate-parser \
+      --enable-shell
+  make
+}
+
+check() {
+  cd "${srcdir}/${_basepkgname}-${_upstreamver}"
+  # Disable for now, some tests fail (for instance dhcp-ddns.sigterm_test)
+  #make check
+}
+
+package() {
+  cd "${srcdir}/kea-${_upstreamver}"
+  make DESTDIR="${pkgdir}" install
+  ( cd ./premium && make DESTDIR="${pkgdir}" install )
+  # Handle /var/run -> /run symlink
+  rmdir "${pkgdir}"/var/run/kea
+  rmdir "${pkgdir}"/var/run
+  install -Dm644 "${srcdir}"/tmpfiles-kea.conf "${pkgdir}"/usr/lib/tmpfiles.d/${_basepkgname}.conf
+  # Systemd service files
+  install -Dm644 "${srcdir}"/kea-dhcp4.service "${pkgdir}"/usr/lib/systemd/system/kea-dhcp4.service
+  install -Dm644 "${srcdir}"/kea-dhcp6.service "${pkgdir}"/usr/lib/systemd/system/kea-dhcp6.service
+  install -Dm644 "${srcdir}"/kea-dhcp-ddns.service "${pkgdir}"/usr/lib/systemd/system/kea-dhcp-ddns.service
+  install -Dm644 "${srcdir}"/kea-ctrl-agent.service "${pkgdir}"/usr/lib/systemd/system/kea-ctrl-agent.service
+  install -Dm644 "${srcdir}"/kea.sysusers "${pkgdir}"/usr/lib/sysusers.d/kea.conf
+}

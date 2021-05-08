@@ -1,0 +1,21 @@
+diff --unified --recursive --text src/h2o-2.2.6/CMakeLists.txt src.new/h2o-2.2.6/CMakeLists.txt
+--- src/h2o-2.2.6/CMakeLists.txt	2019-08-12 10:09:44.000000000 -0400
++++ src.new/h2o-2.2.6/CMakeLists.txt	2021-04-23 20:01:13.588528715 -0400
+@@ -70,7 +70,7 @@
+ OPTION(WITHOUT_LIBS "skip building libs even when possible" OFF)
+ OPTION(BUILD_SHARED_LIBS "whether to build a shared library" OFF)
+ 
+-FIND_PROGRAM(RUBY ruby)
++FIND_PROGRAM(RUBY ruby-2.7)
+ FIND_PROGRAM(BISON bison)
+ IF (RUBY AND BISON)
+     SET(WITH_MRUBY_DEFAULT "ON")
+@@ -460,7 +460,7 @@
+     ELSE ()
+         SET(MRUBY_TOOLCHAIN "gcc")
+     ENDIF ()
+-    ADD_CUSTOM_TARGET(mruby MRUBY_TOOLCHAIN=${MRUBY_TOOLCHAIN} MRUBY_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/misc/mruby_config.rb MRUBY_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}/mruby ruby minirake
++    ADD_CUSTOM_TARGET(mruby MRUBY_TOOLCHAIN=${MRUBY_TOOLCHAIN} MRUBY_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/misc/mruby_config.rb MRUBY_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}/mruby ruby-2.7 minirake
+         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/mruby)
+     LIST(APPEND STANDALONE_SOURCE_FILES
+         lib/handler/mruby.c

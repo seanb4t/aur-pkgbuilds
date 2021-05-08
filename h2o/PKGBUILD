@@ -1,0 +1,62 @@
+# Maintainer: Andy Weidenbaum <archbaum@gmail.com>
+# Contributor: Paul Préfontaine <paul+archlinuxaur@prefontaine.name>
+# Contributor: HLFH <gaspard@dhautefeuille.eu>
+# Contributor: Wilhelm Schuster <wilhelm [aT] wilhelm [.] re>
+# Contributor: The_Decryptor
+
+pkgname=h2o
+pkgver=2.2.6
+pkgrel=2
+pkgdesc="Optimized HTTP server with support for HTTP/1.x and HTTP/2"
+arch=('i686' 'x86_64' 'aarch64')
+depends=('libuv' 'libyaml' 'wslay' 'zlib')
+makedepends=('cmake' 'libtool' 'make' 'pkg-config' 'ruby2.7')
+url="https://github.com/h2o/h2o"
+license=('MIT')
+source=($pkgname-$pkgver.tar.gz::https://codeload.github.com/h2o/$pkgname/tar.gz/v$pkgver
+        ruby2.7.patch
+        h2o.service)
+sha256sums=('f8cbc1b530d85ff098f6efc2c3fdbc5e29baffb30614caac59d5c710f7bda201'
+            '70f0e3d5d5b275a2bb1424ea0a38c9d061f6b517cbe62698f4b5a8d7dde3098c'
+            '8a85462b6798deaaab343b5dae73437e251c5018d70d260a4a4440b9bbb053e6')
+backup=('etc/h2o.conf')
+provides=('h2o' 'libh2o')
+conflicts=('libh2o')
+
+prepare() {
+  cd "$srcdir/$pkgname-$pkgver"
+  patch --strip=2 --forward  --input="${srcdir}/ruby2.7.patch"
+}
+ 
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  msg2 'Building...'
+  cmake \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=/usr/lib \
+    -DWITH_BUNDLED_SSL=on \
+    -DWITH_MRUBY=on \
+    .
+  make
+  make libh2o
+}
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  msg2 'Installing license...'
+  install -Dm 644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+
+  msg2 'Installing documentation...'
+  install -Dm 644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+
+  msg2 'Installing systemd service...'
+  install -Dm 644 "$srcdir/h2o.service" "$pkgdir/usr/lib/systemd/system/h2o.service"
+
+  msg2 'Installing conf file...'
+  install -Dm 644 examples/h2o/h2o.conf "$pkgdir/etc/h2o.conf"
+
+  msg2 'Installing...'
+  make DESTDIR="$pkgdir" install
+}
