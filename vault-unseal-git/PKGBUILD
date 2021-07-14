@@ -1,0 +1,39 @@
+# Maintainer: Sean Brandt <sean at fzymgc.dev>
+pkgname=vault-unseal-git
+pkgver=r31.532f8d9
+pkgrel=1
+pkgdesc="vault-unseal for homelab, baremetal non-enterprise auto unseal of hashicorp vault"
+arch=('x86_64' 'aarch64' 'armv6h' 'armv7h')
+url="https://github.com/lrstanley/vault-unseal"
+license=('MIT')
+
+provides=('vault-unseal')
+conflicts=('vault-unseal')
+
+makedepends=('git' 'go')
+
+
+source=('vault-unseal.service' 'vault-unseal.yaml' "${pkgname%-git}::git+https://github.com/lrstanley/vault-unseal.git#branch=master")
+
+pkgver() {
+  cd "${pkgname%-git}"
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+build() {
+  cd "${pkgname%-git}"
+  make
+}
+
+package() {
+  cd "${pkgname%-git}"
+  install -D -o root -g root -m 0755 -p vault-unseal "${pkgdir}/usr/bin/vault-unseal"
+  cd "${srcdir}"
+  install -D -o root -g root -m 0644 -p vault-unseal.service "${pkgdir}/usr/lib/systemd/system/vault-unseal.service"
+  install -D -o root -g root -m 0600 -p vault-unseal.yaml "${pkgdir}/etc/vault-unseal.yaml"
+}
+
+sha256sums=('e0cbf61abb6bc6be8dc6dbe037a46c590c16ff183d5f7f7c77bbf86a996253b9'
+            '4f8390b759c169af969554199f3404d3422951aa8292465336374fd08582db92'
+            'SKIP')
+
