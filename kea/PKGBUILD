@@ -3,8 +3,8 @@
 # Contributor: nfnty
 pkgname='kea-premium'
 _basepkgname='kea'
-pkgver=1.9.6
-_upstreamver=1.9.6
+pkgver=1.9.8
+_upstreamver=1.9.8
 pkgrel=1
 pkgdesc='High-performance, extensible DHCP server engine from ISC, supporting both DHCPv4 and DHCPv6'
 arch=('x86_64' 'aarch64')
@@ -45,9 +45,9 @@ source=(
   'kea.install'
   'kea.sysusers'
 )
-sha512sums=('958656e72b20e9c13ec1dff1a5303e7c01e957e66627da85f3ce8ed26756aadfa03fa9673964fb73f1305a82dfc7fcb259f3ab91910fc3081a6530e090f3700c'
+sha512sums=('998769a502f2ddbf4ae8ed72b9c65e43b01c5d0c54d8cd23984c58aba56b62ed704957c1b373549d24a84890d27429f931bb7ac84ec83329d2c87ad9f403f2be'
             'SKIP'
-            '01e5a82cfef6fb7435e1be386f52a5b4882ea02a68dcbaccaedaecf8b30915d09aab85067452aea28590acc15ffa48c87deeac144a86d8a6a556160f2ec53cab'
+            '9f7175b3a0a27379d89d135fcdc6dd25652f63ca5683e2aa3e3bbfbe4fa4e8485aec8ba69f7de6dab1fd9561aed76771081341c216462c9ba03af6606ca7f75b'
             'SKIP'
             'b83479f0b90caf4022b1c858f99d8310848a90b0cc45aaa222cb2bf08b2a97312816b8f64c8c0232b612795bc7a0bbe5b05dbc508b2f1214c1ea88dc84200a2d'
             '1b62dace9f9a955b21c5dd5b5466fb3a4f1d8057ad2a30ea89e222a769dc721ad2fe4913c41ec407e018b1b38ddde757e9b7b8fc12d4763ddde077a0abb0c971'
