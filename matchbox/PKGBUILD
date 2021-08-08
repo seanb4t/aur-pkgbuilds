@@ -7,18 +7,24 @@ arch=(aarch64 arm x86_64)
 url='https://matchbox.psdn.io/'
 _url='https://github.com/poseidon/matchbox'
 pkgver=0.9.0
-pkgrel=1
+pkgrel=3
 license=('APACHE')
 makedepends=(go)
 
 source=("${pkgname}-${pkgver}.tar.gz::${_url}/archive/refs/tags/v${pkgver}.tar.gz"
+        matchbox.service
         matchbox.sysusers)
+
 sha256sums=('3cb92acacacc7974a9565808ea525d2d13791fac99c6b1a8a4e7c09bd076f91b'
+            'd0da27d9f042007b5495b44f7eb3982fb8e05b88c6c99662af0b3298d3424fdb'
             'b5a40ff91c6b14fcfc6261a64a1221bc2dd20403ab5727fa8c3719fe4e3a36ea')
 sha512sums=('9177893feb944d81c29d896d1881e9765b01823fe803755ccf07a65dc2ef23a436f50227edb87a9f685f06fac88978e213bf2c18e84690b63d00b86fa676f366'
+            '26e863fd67a5f7527154655bb7ecd525d6789d2955850025f63ba5a759f7d92a91368a073e3c6e3f4c3ce19378ca44542db3e8d0a3d0f0a35d1cad3643569d46'
             'fa4119b0d8d858b3b622d402815cefb934de54ce0e1db702eb36b8324bc2a979fb69d79f3f7a2777026161cd3beae893089f6a7511f0d129580f0660023919d7')
 b2sums=('cf2cd53340e4c0ccd58ad8e2578a6c062c7762211aef75ec67903b76bd1c42899aeb0668f9fb6630dcdcb1caae4cf4d69382e7557c4cff3c99fb86b8802a8213'
+        '19ba763885f18d3bf9d253ca0af952b644f23ded52a36fef26b161e84a1da47fdc88146537c03a4e4f58828c092d7da2ecf4cc957bbd08ac880614b1392c47ca'
         '8f346d37b0986aa89c45817dcb2a87e0a44c1b4a4bea19cb842c754fe9cbbd6fa6710b12bdcbf2eb82ca16605005719e2177b4a14d84b7ab6c3d4c00a1856d56')
+
 provides=($pkgname)
 conflicts=($pkgname)
 
@@ -45,10 +51,9 @@ check() {
 
 package() {
   cd "${pkgname}-${pkgver}"
-  mkdir -p "${pkgdir}"/var/lib/matchbox/assets
 
   install -Dm644 "${srcdir}/matchbox.sysusers" "${pkgdir}/usr/lib/sysusers.d/$pkgname.conf"
-  install -Dm644 "contrib/systemd/matchbox.service" "$pkgdir/usr/lib/systemd/system/matchbox.service"
+  install -Dm644 "${srcdir}/matchbox.service" "$pkgdir/usr/lib/systemd/system/matchbox.service"
   install -Dm755 "build/$pkgname" "$pkgdir/usr/bin/$pkgname"
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 

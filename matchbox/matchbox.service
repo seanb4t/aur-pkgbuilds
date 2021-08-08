@@ -1,0 +1,21 @@
+[Unit]
+Description=Matchbox Server
+Documentation=https://github.com/poseidon/matchbox
+
+[Service]
+User=matchbox
+Group=matchbox
+Environment="MATCHBOX_ADDRESS=0.0.0.0:8080"
+EnvironmentFile=-/etc/default/matchbox
+ExecStart=/usr/bin/matchbox
+
+# systemd.exec
+ProtectHome=yes
+ProtectSystem=full
+RuntimeDirectory=matchbox
+ConfigurationDirectory=matchbox
+StateDirectory=matchbox/assets
+RuntimeDirectoryPreserve=yes
+
+[Install]
+WantedBy=multi-user.target
